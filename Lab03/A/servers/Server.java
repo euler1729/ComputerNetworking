@@ -100,7 +100,6 @@ class ClientHandler extends Thread {
         }
     }
     private static void sendFile(String fileName) throws Exception{
-        out.writeUTF("Message from sendFile method.");
         out.flush();
         int bytes = 0;
         // Open the File where he located in your pc

@@ -12,10 +12,10 @@ public class Client{
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
             while (socket.isConnected()){
+                System.out.print("Enter filename to Download: ");sockso
                 String send = scanner.nextLine();
                 out.writeUTF(send);
                 out.flush();
-                System.out.println(in.readUTF());
                 receiveFile(send);
             }
             in.close();
