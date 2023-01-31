@@ -5,6 +5,7 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 
 import User.User;
 
@@ -21,6 +22,7 @@ public class Server{
     static User user2 = new User("arif", "1234", 0);
 
     public static void main(String[] args) throws Exception{
+        init();
         list.add(new User("arif", "1234", 0));
         list.add(new User("mahmud", "124", 0));
         list.add(new User("ab", "124", 0));
@@ -90,7 +92,7 @@ public class Server{
         server.close();
         input.close();
         out.close();
-
+        finish();
 
     }
 
@@ -102,5 +104,20 @@ public class Server{
         }
         return -1;
 
+    }
+    static void init(){
+        File file = new File("File");
+        while (file.hasNextLine()){
+            String data = file.nextLine();
+            String[] op = data.split(" ");
+            User user = new User(op[0], op[1], Integer.parseInt(op[2]));
+            list.add(user);
+        }
+    }
+    static void finish(){
+        File f = new File("File");
+        for(User u : list){
+            f.write(u.getuserName() + " " + u.getpassword() + " " + u.getbalance());
+        }
     }
 }

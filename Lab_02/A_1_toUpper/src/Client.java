@@ -102,24 +102,4 @@ public class Client {
         client.listenForMessage();
         client.sendMessage();
     }
-//    private String getIP(){
-//        String ip=null;
-//        try {
-//            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-//            while (interfaces.hasMoreElements()) {
-//                NetworkInterface networkInterface = interfaces.nextElement();
-//                // filters out 127.0.0.1 and inactive interfaces
-//                if (networkInterface.isLoopback() || !networkInterface.isUp()) continue;
-//                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-//                while(addresses.hasMoreElements()) {
-//                    InetAddress addr = addresses.nextElement();
-//                    if (addr instanceof Inet6Address) continue;
-//                    ip = addr.getHostAddress();
-//                }
-//            }
-//        } catch (SocketException e) {
-//            System.out.println(e);
-//        }
-//        return ip;
-//    }
 }
