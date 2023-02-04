@@ -36,9 +36,14 @@ public class Server {
                 serverSocket.close();
                 break;
             }
-            InetAddress inetAddress = java.net.InetAddress.getByName(received_data);
+            String ip = null;
+            try{
+                InetAddress inetAddress = java.net.InetAddress.getByName(received_data);
+                ip = inetAddress.toString();
+            }catch (Exception exception){
+               ip = "Host Not Found";
+            }
             //String ip = ip_hash.get(received_data);
-            String ip = inetAddress.toString();
             String send_msg = Objects.requireNonNullElse(ip, "Host not found");
             DatagramPacket send_pack = new DatagramPacket(send_msg.getBytes(),
                                         send_msg.getBytes().length,ip_client,port_client);
