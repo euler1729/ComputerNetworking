@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="fb9d5739-b5c9-4492-ab74-6c32e007326a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../../Socket/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/Socket.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/Socket/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/out/production/Socket/Client.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/out/production/Socket/Server.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/src/Client.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Socket/src/Server.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2KmFE9wvXfj2iesFl5lJ7cvfijH" />
+  <component name="ProjectViewState">
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fb9d5739-b5c9-4492-ab74-6c32e007326a" name="Changes" comment="" />
+      <created>1674571736587</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1674571736587</updated>
+      <workItem from="1674571740108" duration="13000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
