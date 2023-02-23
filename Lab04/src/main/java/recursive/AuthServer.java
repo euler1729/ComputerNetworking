@@ -1,19 +1,21 @@
-//package server;
+//package recursive;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.nio.charset.StandardCharsets;
 
-public class Server {
+public class AuthServer {
+    static int myport = 1200;
     public static void main(String[] args) {
         DatagramSocket socket = null;
         try {
-            //server running on port 1235
-            socket = new DatagramSocket(1235);
-            System.out.println("server running on " + getLocalIP() + ":1235");
+            //server running on port 1237
+            socket = new DatagramSocket(myport);
+            System.out.println("server running on " + getLocalIP() + ":"+myport);
             while (true) {
-                byte[] reqBuf = new byte[4096];
+                byte[] reqBuf = new byte[512];
                 DatagramPacket reqPack = new DatagramPacket(reqBuf, reqBuf.length);
                 socket.receive(reqPack);
                 Thread thread = new Thread(new ClientHandler(socket, reqPack));
@@ -51,7 +53,6 @@ public class Server {
         }
         return ip;
     }
-
     public static class ClientHandler implements Runnable {
         public static ArrayList<Record> store;
         private final DatagramSocket socket;
@@ -63,6 +64,7 @@ public class Server {
         @Override
         public void run() {
             try {
+//                System.out.println("req: "+Arrays.toString(requestPacket.getData()));
                 byte[] resBuf = handleReq(requestPacket.getData());
                 DatagramPacket resPack = new DatagramPacket(
                         resBuf,
@@ -89,14 +91,17 @@ public class Server {
             System.out.println("req id: " + rid);
             String qName = "";
             int len;
-            byte[] segment;
+            byte[] segment=new byte[3];
             while ((len = inputStream.readByte()) > 0) {
                 segment = new byte[len];
-                for (int i = 0; i < len; i++) segment[i] = inputStream.readByte();
+                for (int i = 0; i < len; i++) {
+                    segment[i] = inputStream.readByte();
+                }
                 qName += new String(segment, StandardCharsets.UTF_8) + ".";
             }
             //erasing trailing part
-            qName = qName.substring(0, qName.length() - 1);
+            System.out.println("qname len: "+qName.length());
+            if(qName.length()>0)qName = qName.substring(0, qName.length() - 1);
             System.out.println("url: " + qName);
             int k;
             store = Record.read("records.txt");
@@ -107,7 +112,7 @@ public class Server {
             Record.write(store,"records.txt");
             short qType = inputStream.readShort();
             short qClass = inputStream.readShort();
-            
+
             //Starting writing output
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             DataOutputStream outputStream = new DataOutputStream(byteArrayOutputStream);
@@ -148,7 +153,6 @@ public class Server {
             return byteArrayOutputStream.toByteArray();
         }
     }
-
     public static class Record {
         private short ttl;
         private short type;

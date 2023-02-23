@@ -12,7 +12,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="Lab04" options="--add-exports java.base/sun.net.www.http=ALL-UNNAMED" />
+      <module name="Lab04" options="" />
     </option>
   </component>
 </project>
