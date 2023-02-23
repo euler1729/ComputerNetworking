@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Lab04_TCP_Tahoe.iml" filepath="$PROJECT_DIR$/Lab04_TCP_Tahoe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Lab05_TCP_Tahoe.iml" filepath="$PROJECT_DIR$/Lab05_TCP_Tahoe.iml" />
     </modules>
   </component>
 </project>
