@@ -40,14 +40,11 @@ public class Server {
                 if (bytesRead == -1) {
                     break;
                 }
-
                 // Write data to the output stream
                 outputStream.write(buffer, 0, bytesRead);
-
                 // Update sequence number
                 sequenceNumber += bytesRead;
             }
-
             // Check if the sliding window has moved
             if (sequenceNumber >= windowEnd || ackNumber == sequenceNumber - 1) {
                 // Flush the output stream and update the sliding window
@@ -56,7 +53,6 @@ public class Server {
                 windowEnd = windowStart + WINDOW_SIZE;
                 System.out.println("Received data up to sequence number " + sequenceNumber);
             }
-
             // Send acknowledgment back to the client
             outputStream.writeInt(windowStart);
         }

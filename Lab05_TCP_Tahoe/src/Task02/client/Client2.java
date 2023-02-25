@@ -3,10 +3,10 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class Client {
+public class Client2 {
     private static final int MSS = 1024; // maximum segment size
     private static final int BUFFER_SIZE = 65536; // buffer size
-    private static final int PORT = 5001; // port number
+    private static final int PORT = 5000; // port number
     private static final int TIMEOUT = 5000; // timeout value in milliseconds
     private static final double ALPHA = 0.125; // EWMA alpha value
     private static final double BETA = 0.25; // EWMA beta value
@@ -19,7 +19,7 @@ public class Client {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         InetAddress address = InetAddress.getByName("localhost");
-        Socket socket = new Socket(address, PORT);
+        DatagramSocket socket = new DatagramSocket();
 
         File file = new File("book.pdf");
         byte[] fileData = new byte[(int) file.length()];
@@ -34,29 +34,31 @@ public class Client {
         long startTime = System.nanoTime();
         long endTime;
 
-        OutputStream outputStream = socket.getOutputStream();
-        try {
-            while (true) {
-                // Send packets
-                int packetCount = 0;
-                while (packetCount < cwnd / MSS && lastSeqNum < numPackets) {
-                    int dataSize = Math.min(MSS, fileData.length - lastSeqNum * MSS);
-                    byte[] buffer = new byte[dataSize + 4];
-                    ByteBuffer.wrap(buffer, 0, 4).putInt(lastSeqNum + 1);
-                    System.arraycopy(fileData, lastSeqNum * MSS, buffer, 4, dataSize);
-                    outputStream.write(buffer);
-                    lastSeqNum++;
-                    packetCount++;
-                }
+        while (true) {
+            // Send packets
+            int packetCount = 0;
+            while (packetCount < cwnd / MSS && lastSeqNum < numPackets) {
+                int dataSize = Math.min(MSS, fileData.length - lastSeqNum * MSS);
+                byte[] buffer = new byte[dataSize + 4];
+                ByteBuffer.wrap(buffer, 0, 4).putInt(lastSeqNum + 1);
+                System.arraycopy(fileData, lastSeqNum * MSS, buffer, 4, dataSize);
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, PORT);
+                socket.send(packet);
+                lastSeqNum++;
+                packetCount++;
+            }
 
-                // Receive acknowledgments
-                byte[] ackBuffer = new byte[4];
-                InputStream inputStream = socket.getInputStream();
-                int ackIndex;
-                while ((ackIndex = inputStream.read(ackBuffer, 0, 4)) != -1) {
-                    int ackSeqNum = ByteBuffer.wrap(ackBuffer, 0, 4).getInt();
+            // Receive acknowledgments
+            byte[] ackBuffer = new byte[4];
+            DatagramPacket ackPacket = new DatagramPacket(ackBuffer, ackBuffer.length);
+            socket.setSoTimeout(TIMEOUT);
+            boolean timeoutOccurred = false;
+            while (packetCount > 0 && !timeoutOccurred) {
+                try {
+                    socket.receive(ackPacket);
+                    int ackSeqNum = ByteBuffer.wrap(ackPacket.getData(), 0, 4).getInt();
                     if (ackSeqNum >= expectedSeqNum && ackSeqNum <= lastSeqNum) {
-                        ackIndex = ackSeqNum - 1;
+                        int ackIndex = ackSeqNum - 1;
                         if (!acksReceived[ackIndex]) {
                             acksReceived[ackIndex] = true;
                             packetCount--;
@@ -79,37 +81,42 @@ public class Client {
                                     ssthresh = cwnd / 2;
                                     cwnd = ssthresh + 3 * MSS;
                                     lastSeqNum = ackSeqNum - 1;
-                                    for (int i = ackSeqNum - 1; i < lastSeqNum; i++) {
-                                        acksReceived[i] = false;
-                                    }
-                                    duplicateAcks = 0;
-                                    break;
+                                    packetCount = 0;
                                 }
                             }
                         }
-                        if (acksReceived[numPackets - 1]) {
-                            // All packets have been acknowledged
-                            endTime = System.nanoTime();
-                            long duration = (endTime - startTime) / 1000000; // in milliseconds
-                            System.out.println("File sent successfully in " + duration + "ms");
-                        } else {
-                            // Timeout occurred while waiting for acknowledgments
-                            ssthresh = cwnd / 2;
-                            cwnd = MSS;
-                            expectedSeqNum = 1;
-                            lastSeqNum = 0;
-                            duplicateAcks = 0;
-                            System.out.println("Timeout occurred. Resending packets...");
-                        }
+                    }
+
+                } catch (SocketTimeoutException e) {
+                    timeoutOccurred = true;
+                }
+                // Check if all packets have been acknowledged
+                boolean allRecvd = true;
+                for(boolean val:acksReceived){
+                    if(!val){
+                        allRecvd = false;
+                        break;
                     }
                 }
+                if (allRecvd) {
+                    endTime = System.nanoTime();
+                    double totalTime = (endTime - startTime) / 1_000_000.0;
+                    double fileSize = file.length() / (1024.0 * 1024.0);
+                    double throughput = fileSize / (totalTime / 1000.0);
+                    System.out.println("File sent successfully!");
+                    System.out.printf("File size: %.2f MB\n", fileSize);
+                    System.out.printf("Time taken: %.2f ms\n", totalTime);
+                    System.out.printf("Throughput: %.2f MB/s\n", throughput);
+                }
+                // Update congestion window after timeout
+                if (timeoutOccurred) {
+                    ssthresh = cwnd / 2;
+                    cwnd = MSS;
+                    lastSeqNum = expectedSeqNum - 1;
+                    Arrays.fill(acksReceived, false);
+                    System.out.println("Timeout occurred, resending packets...");
+                }
             }
-        }catch (Exception exception){
-            exception.printStackTrace();
         }
-        socket.close();
-        outputStream.close();
-        fileInputStream.close();
-        bufferedInputStream.close();
     }
 }

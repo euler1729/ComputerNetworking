@@ -1,41 +1,59 @@
-import java.net.*;
 import java.io.*;
+import java.net.*;
 import java.nio.ByteBuffer;
 
 public class Server {
     private static final int MSS = 1024; // maximum segment size
     private static final int BUFFER_SIZE = 65536; // buffer size
-    private static final int PORT = 5000; // port number
+    private static final int PORT = 5001; // port number
     private static final int TIMEOUT = 5000; // timeout value in milliseconds
 
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(PORT);
-        Socket clientSocket = serverSocket.accept();
+        System.out.println("Server listening on PORT: "+PORT);
+        Socket socket = serverSocket.accept();
 
-        InputStream in = clientSocket.getInputStream();
-        OutputStream out = clientSocket.getOutputStream();
+        byte[] fileData = new byte[BUFFER_SIZE];
+        FileOutputStream fileOutputStream = new FileOutputStream("received_file.pdf");
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
 
-        byte[] buffer = new byte[BUFFER_SIZE];
-        int rwnd = BUFFER_SIZE;
-        int lastSeqNum = 0;
+        int bytesRead;
+        int expectedSeqNum = 1;
+        boolean[] acksSent = new boolean[100000];
+        while ((bytesRead = socket.getInputStream().read(fileData)) != -1) {
+            int seqNum = extractSeqNum(fileData);
+            if (seqNum == expectedSeqNum) {
+                // Expected packet received, send acknowledgment
+                byte[] ackBuffer = new byte[4];
+                ByteBuffer.wrap(ackBuffer, 0, 4).putInt(expectedSeqNum);
+                socket.getOutputStream().write(ackBuffer);
 
-        while (true) {
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            in.read(buffer, 0, buffer.length);
-            int seqNum = ByteBuffer.wrap(buffer, 0, 4).getInt();
+                // Write data to file
+                bufferedOutputStream.write(fileData, 4, bytesRead - 4);
 
-            if (seqNum == lastSeqNum + 1) {
-                lastSeqNum = seqNum;
-                rwnd -= MSS;
-                if (rwnd < MSS) {
-                    rwnd = 0;
-                }
-                out.write(ByteBuffer.allocate(4).putInt(seqNum).array());
-                out.flush();
+                // Update sequence number
+                expectedSeqNum++;
+                acksSent[seqNum] = true;
             } else {
-                out.write(ByteBuffer.allocate(4).putInt(lastSeqNum).array());
-                out.flush();
+                // Out-of-order packet received, ignore and send duplicate acknowledgment
+                if (!acksSent[seqNum]) {
+                    byte[] ackBuffer = new byte[4];
+                    ByteBuffer.wrap(ackBuffer, 0, 4).putInt(seqNum);
+                    socket.getOutputStream().write(ackBuffer);
+                    acksSent[seqNum] = true;
+                }
             }
         }
+
+        bufferedOutputStream.flush();
+        bufferedOutputStream.close();
+        fileOutputStream.close();
+
+        socket.close();
+        serverSocket.close();
+    }
+
+    private static int extractSeqNum(byte[] buffer) {
+        return ByteBuffer.wrap(buffer, 0, 4).getInt();
     }
 }
