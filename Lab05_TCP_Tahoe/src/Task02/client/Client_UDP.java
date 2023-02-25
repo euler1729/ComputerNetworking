@@ -3,7 +3,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class Client2 {
+public class Client_UDP {
     private static final int MSS = 1024; // maximum segment size
     private static final int BUFFER_SIZE = 65536; // buffer size
     private static final int PORT = 5000; // port number

@@ -1,115 +1,80 @@
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class Client {
-    private static final int MSS = 1024; // maximum segment size
-    private static final int BUFFER_SIZE = 65536; // buffer size
-    private static final int PORT = 5001; // port number
-    private static final int TIMEOUT = 5000; // timeout value in milliseconds
-    private static final double ALPHA = 0.125; // EWMA alpha value
-    private static final double BETA = 0.25; // EWMA beta value
+    public static void main(String[] args) throws IOException {
+        String serverName = "localhost";
+        int port = 1234;
 
-    private static int ssthresh = BUFFER_SIZE; // slow start threshold
-    private static int cwnd = MSS; // congestion window size
-    private static int lastSeqNum = 0;
-    private static int duplicateAcks = 0;
-    private static int expectedSeqNum = 1;
+        // connect to the server and receive the MSS
+        Socket clientSocket = new Socket(serverName, port);
+        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
+        int mss = 1024;
+//        System.out.println("Received MSS: " + mss);
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        InetAddress address = InetAddress.getByName("localhost");
-        Socket socket = new Socket(address, PORT);
+        // initialize variables
+        int cwnd = mss;
+        int ssthresh = Integer.MAX_VALUE;
+        int dupAckCount = 0;
 
+        // divide the file to be transferred into segments of MSS size or smaller
         File file = new File("book.pdf");
+        FileInputStream fileIn = new FileInputStream(file);
         byte[] fileData = new byte[(int) file.length()];
-        FileInputStream fileInputStream = new FileInputStream(file);
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-        bufferedInputStream.read(fileData, 0, fileData.length);
+        fileIn.read(fileData);
+        int numSegments = (int) Math.ceil((double) fileData.length / mss);
+        System.out.println("Number of segments: " + numSegments);
 
-        int numPackets = (int) Math.ceil((double) fileData.length / MSS);
-        boolean[] acksReceived = new boolean[numPackets];
-        Arrays.fill(acksReceived, false);
+        // send each segment to the server and wait for an ACK
+        DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
+        System.out.println("Total file size: "+numSegments*mss+"byte s");
+        out.write(numSegments*mss);
+        out.flush();
+        int ackCount = 0;
+        int currentSegment = 0;
+        long startTime = System.currentTimeMillis();
+        while (ackCount < numSegments) {
+            // send segment
+            int segmentSize = Math.min(mss, fileData.length - currentSegment * mss);
+            out.write(fileData, currentSegment * mss, cwnd);
+            out.flush();
+            System.out.println("Sent segment " + (currentSegment + 1) + " of " + numSegments);
 
-        long startTime = System.nanoTime();
-        long endTime;
-
-        OutputStream outputStream = socket.getOutputStream();
-        try {
-            while (true) {
-                // Send packets
-                int packetCount = 0;
-                while (packetCount < cwnd / MSS && lastSeqNum < numPackets) {
-                    int dataSize = Math.min(MSS, fileData.length - lastSeqNum * MSS);
-                    byte[] buffer = new byte[dataSize + 4];
-                    ByteBuffer.wrap(buffer, 0, 4).putInt(lastSeqNum + 1);
-                    System.arraycopy(fileData, lastSeqNum * MSS, buffer, 4, dataSize);
-                    outputStream.write(buffer);
-                    lastSeqNum++;
-                    packetCount++;
+            // wait for ACK
+            int timeout = 5000; // 5 seconds
+            clientSocket.setSoTimeout(timeout);
+            try {
+                int ack = in.readInt();
+                System.out.println("Received ACK: " + ack);
+                ackCount++;
+                dupAckCount = 0;
+                if (cwnd < ssthresh) {
+                    cwnd += mss; // increase cwnd in slow start
+                } else {
+                    cwnd += (mss * mss) / cwnd; // increase cwnd in congestion avoidance
                 }
-
-                // Receive acknowledgments
-                byte[] ackBuffer = new byte[4];
-                InputStream inputStream = socket.getInputStream();
-                int ackIndex;
-                while ((ackIndex = inputStream.read(ackBuffer, 0, 4)) != -1) {
-                    int ackSeqNum = ByteBuffer.wrap(ackBuffer, 0, 4).getInt();
-                    if (ackSeqNum >= expectedSeqNum && ackSeqNum <= lastSeqNum) {
-                        ackIndex = ackSeqNum - 1;
-                        if (!acksReceived[ackIndex]) {
-                            acksReceived[ackIndex] = true;
-                            packetCount--;
-                            if (ackSeqNum == expectedSeqNum) {
-                                // Update congestion window
-                                expectedSeqNum++;
-                                duplicateAcks = 0;
-                                if (cwnd < ssthresh) {
-                                    // Slow start
-                                    cwnd += MSS;
-                                } else {
-                                    // Congestion avoidance
-                                    cwnd += (MSS * MSS / cwnd);
-                                }
-                            } else {
-                                // Duplicate acknowledgment
-                                duplicateAcks++;
-                                if (duplicateAcks == 3) {
-                                    // Fast retransmit
-                                    ssthresh = cwnd / 2;
-                                    cwnd = ssthresh + 3 * MSS;
-                                    lastSeqNum = ackSeqNum - 1;
-                                    for (int i = ackSeqNum - 1; i < lastSeqNum; i++) {
-                                        acksReceived[i] = false;
-                                    }
-                                    duplicateAcks = 0;
-                                    break;
-                                }
-                            }
-                        }
-                        if (acksReceived[numPackets - 1]) {
-                            // All packets have been acknowledged
-                            endTime = System.nanoTime();
-                            long duration = (endTime - startTime) / 1000000; // in milliseconds
-                            System.out.println("File sent successfully in " + duration + "ms");
-                        } else {
-                            // Timeout occurred while waiting for acknowledgments
-                            ssthresh = cwnd / 2;
-                            cwnd = MSS;
-                            expectedSeqNum = 1;
-                            lastSeqNum = 0;
-                            duplicateAcks = 0;
-                            System.out.println("Timeout occurred. Resending packets...");
-                        }
-                    }
-                }
+            } catch (SocketTimeoutException e) {
+                // timeout, packet loss detected
+                System.out.println("Packet loss detected");
+                ssthresh = cwnd / 2;
+                cwnd = mss;
+                dupAckCount = 0;
+                currentSegment -= ackCount;
+                ackCount = 0;
             }
-        }catch (Exception exception){
-            exception.printStackTrace();
+            currentSegment++;
         }
-        socket.close();
-        outputStream.close();
-        fileInputStream.close();
-        bufferedInputStream.close();
+
+        // close connection
+        in.close();
+        out.close();
+        clientSocket.close();
+
+        // calculate throughput and transmission time
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+        double throughput = (double) fileData.length / totalTime * 1000 / 1024; // Mbps
+        System.out.println("Transmission time: " + totalTime + " ms");
+        System.out.println("Throughput: " + throughput + " Mbps");
     }
 }

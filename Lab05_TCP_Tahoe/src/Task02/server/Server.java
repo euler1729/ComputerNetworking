@@ -1,59 +1,70 @@
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 
 public class Server {
-    private static final int MSS = 1024; // maximum segment size
-    private static final int BUFFER_SIZE = 65536; // buffer size
-    private static final int PORT = 5001; // port number
-    private static final int TIMEOUT = 5000; // timeout value in milliseconds
+    public static void main(String[] args) {
+        try {
+            ServerSocket serverSocket = new ServerSocket(1234);
+            System.out.println("Server started and listening on port 1234...");
 
-    public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(PORT);
-        System.out.println("Server listening on PORT: "+PORT);
-        Socket socket = serverSocket.accept();
+            // Accept client connection
+            Socket socket = serverSocket.accept();
+            System.out.println("Client connected: " + socket.getInetAddress().getHostName());
 
-        byte[] fileData = new byte[BUFFER_SIZE];
-        FileOutputStream fileOutputStream = new FileOutputStream("received_file.pdf");
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+            // Receive the MSS from client
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            int MSS = 1024;
+            // Initialize congestion control variables
+            int cwnd = MSS;
+            int ssthresh = 100000;
+            int dupACKcount = 0;
 
-        int bytesRead;
-        int expectedSeqNum = 1;
-        boolean[] acksSent = new boolean[100000];
-        while ((bytesRead = socket.getInputStream().read(fileData)) != -1) {
-            int seqNum = extractSeqNum(fileData);
-            if (seqNum == expectedSeqNum) {
-                // Expected packet received, send acknowledgment
-                byte[] ackBuffer = new byte[4];
-                ByteBuffer.wrap(ackBuffer, 0, 4).putInt(expectedSeqNum);
-                socket.getOutputStream().write(ackBuffer);
+            // Receive file data from client
+            InputStream is = socket.getInputStream();
+            FileOutputStream fos = new FileOutputStream("received_file.pdf");
+            byte[] buffer = new byte[MSS];
+            int bytesRead;
 
-                // Write data to file
-                bufferedOutputStream.write(fileData, 4, bytesRead - 4);
+            while ((bytesRead = is.read(buffer)) != -1) {
+                // Simulate packet loss by dropping the 3rd packet
+                if (dupACKcount == 2) {
+                    System.out.println("Simulating packet loss...");
+                    dupACKcount = 0;
+                    continue;
+                }
 
-                // Update sequence number
-                expectedSeqNum++;
-                acksSent[seqNum] = true;
-            } else {
-                // Out-of-order packet received, ignore and send duplicate acknowledgment
-                if (!acksSent[seqNum]) {
-                    byte[] ackBuffer = new byte[4];
-                    ByteBuffer.wrap(ackBuffer, 0, 4).putInt(seqNum);
-                    socket.getOutputStream().write(ackBuffer);
-                    acksSent[seqNum] = true;
+                // Write data to file and send ACK
+                fos.write(buffer, 0, buffer.length);
+                dupACKcount++;
+                OutputStream os = socket.getOutputStream();
+                os.write("ACK\n".getBytes());
+                os.flush();
+
+                // Update congestion control variables
+                if (cwnd < ssthresh) {
+                    cwnd += MSS;
+                } else {
+                    cwnd += (MSS * MSS) / cwnd;
+                }
+
+                // Switch to fast retransmit if packet loss is detected
+                if (dupACKcount == 3) {
+                    System.out.println("Packet loss detected, switching to fast retransmit...");
+                    ssthresh = cwnd / 2;
+                    cwnd = MSS;
+                    dupACKcount = 0;
                 }
             }
+
+            System.out.println("File received successfully.");
+
+            // Close streams and socket
+            fos.close();
+            is.close();
+            socket.close();
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        bufferedOutputStream.flush();
-        bufferedOutputStream.close();
-        fileOutputStream.close();
-
-        socket.close();
-        serverSocket.close();
-    }
-
-    private static int extractSeqNum(byte[] buffer) {
-        return ByteBuffer.wrap(buffer, 0, 4).getInt();
     }
 }
