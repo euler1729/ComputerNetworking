@@ -4,13 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc2a67a1-52e2-48f2-ba19-e58aec183573" name="Changes" comment="Congestion control">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Task02/client/text.txt" afterDir="false" />
+    <list default="true" id="fc2a67a1-52e2-48f2-ba19-e58aec183573" name="Changes" comment="Congestion control 2">
+      <change afterPath="$PROJECT_DIR$/../Lab06_TCP_Reno/src/client/Client.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Lab06_TCP_Reno/src/client/a.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Lab06_TCP_Reno/src/server/Server.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Task02/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Task02/client/Client.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Task02/client/Client2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Task02/client/Client_UDP.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Task02/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Task02/server/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,25 +35,25 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/home/mahmud/ComputerNetworking/Lab05_TCP_Tahoe/src/Task02/client",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/mahmud/ComputerNetworking/Lab05_TCP_Tahoe&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/Task02/client" />
@@ -72,7 +70,11 @@
       <updated>1677165256497</updated>
       <workItem from="1677165257729" duration="667000" />
       <workItem from="1677242445261" duration="8045000" />
-      <workItem from="1677307048168" duration="22370000" />
+      <workItem from="1677307048168" duration="22701000" />
+      <workItem from="1677379946553" duration="8000" />
+      <workItem from="1677388553126" duration="1096000" />
+      <workItem from="1678806883998" duration="599000" />
+      <workItem from="1678809627353" duration="12000" />
     </task>
     <task id="LOCAL-00001" summary="TCP Tahoe Testing">
       <created>1677267570172</created>
@@ -95,7 +97,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677338789926</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Congestion control 2">
+      <created>1677355407231</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1677355407231</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -105,6 +114,7 @@
     <MESSAGE value="TCP Tahoe Testing" />
     <MESSAGE value="Flow Control" />
     <MESSAGE value="Congestion control" />
-    <option name="LAST_COMMIT_MESSAGE" value="Congestion control" />
+    <MESSAGE value="Congestion control 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="Congestion control 2" />
   </component>
 </project>

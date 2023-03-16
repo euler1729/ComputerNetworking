@@ -28,7 +28,7 @@ public class Server{
                 Thread thread = new ClientHandler(socket, in, out);
                 thread.start();
             }catch (Exception e){
-//                e.printStackTrace();
+                e.printStackTrace();
             }
         }
     }
